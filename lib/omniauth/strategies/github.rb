@@ -29,6 +29,7 @@ module OmniAuth
         {
           'nickname' => raw_info['login'],
           'email' => email,
+          'emails' => emails.map { |email| email['email'] },
           'name' => raw_info['name'],
           'image' => raw_info['avatar_url'],
           'urls' => {
