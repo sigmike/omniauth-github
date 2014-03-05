@@ -29,6 +29,9 @@ module OmniAuth
         {
           'nickname' => raw_info['login'],
           'email' => email,
+          'primary_email' => primary_email,
+          'emails' => emails.map { |email| email['email'] },
+          'verified_emails' => verified_emails.map { |email| email['email'] },
           'name' => raw_info['name'],
           'image' => raw_info['avatar_url'],
           'urls' => {
@@ -52,8 +55,8 @@ module OmniAuth
       end
 
       def primary_email
-        primary = emails.find{|i| i['primary'] }
-        primary && primary['email'] || emails.first && emails.first['email']
+        primary = verified_emails.find{|i| i['primary'] }
+        (primary && primary['email']) || (verified_emails.first && verified_emails.first['email'])
       end
 
       # The new /user/emails API - http://developer.github.com/v3/users/emails/#future-response
@@ -61,6 +64,10 @@ module OmniAuth
         return [] unless email_access_allowed?
         access_token.options[:mode] = :query
         @emails ||= access_token.get('user/emails', :headers => { 'Accept' => 'application/vnd.github.v3' }).parsed
+      end
+
+      def verified_emails
+        @verified_emails ||= emails.select{|i| i['verified']}
       end
 
       def email_access_allowed?
